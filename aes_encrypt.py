@@ -30,13 +30,27 @@ SBOX = [0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,
 		0x68,0x41,0x99,0x2d,0x0f,0xb0,0x54,0xbb,0x16]
 
 
-def read_file(filename):
+def get_blocks_from_file(filename):
+	"""Generate 16 byte blocks from file.
+	If the last block is not of len 16 then 0x01, 0x00, 0x00... 0x00 is added.
+	Params:
+		- filename: Name of the file to be read
+	"""
 	file_content = open(filename, 'rb')
+	blocks = []
 	while True:
 		data = file_content.read(BLOCK_SIZE)
 		if not data:
 			break
-		print(len(data))
+		if len(data) < BLOCK_SIZE:
+			mutable_bytes = bytearray(data)
+			mutable_bytes.append(1)
+			for _ in range(BLOCK_SIZE - len(mutable_bytes)):
+				mutable_bytes.append(0)			
+			data = bytes(mutable_bytes)	
+		print(data)		
+		blocks.append(data)		
+	return blocks
 
 
 def sub_bytes(state):
@@ -50,7 +64,7 @@ def sub_bytes(state):
 			
 
 def main(filename):
-	read_file(filename)	
+	get_blocks_from_file(filename)	
 
 
 if __name__ == '__main__':
