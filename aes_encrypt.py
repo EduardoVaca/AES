@@ -40,12 +40,18 @@ def read_file(filename):
 
 
 def sub_bytes(state):
-	return state
+	""" Apply simple substitution byte by byte using operantions in GF(2^8)
+	Params:
+		- state: List of 16 bytes.
+	Returns:
+		- List of 16 bytes with substitution applied.
+	"""
+	return [SBOX[x] for x in state]
 			
 
 def main(filename):
-	read_file(filename)
-	
+	read_file(filename)	
+
 
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
