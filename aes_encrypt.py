@@ -40,15 +40,13 @@ def get_blocks_from_file(filename):
 	file_content = open(filename, 'rb')
 	blocks = []
 	while True:
-		data = file_content.read(BLOCK_SIZE)
+		data = bytearray(file_content.read(BLOCK_SIZE))
 		if not data:
 			break
-		if len(data) < BLOCK_SIZE:
-			mutable_bytes = bytearray(data)
-			mutable_bytes.append(1)
-			for _ in range(BLOCK_SIZE - len(mutable_bytes)):
-				mutable_bytes.append(0)
-			data = bytes(mutable_bytes)
+		if len(data) < BLOCK_SIZE:		
+			data.append(1)
+			for _ in range(BLOCK_SIZE - len(data)):
+				data.append(0)			
 		blocks.append(data)
 	return blocks
 
@@ -65,8 +63,7 @@ def sub_bytes(state):
 
 def shift_rows(state):
 	"""Apply row shifting in a block of bytes (16 bytes)
-	"""
-	print(state[0:4])
+	"""	
 	row_size = 4
 	for i in range(4):
 		d = collections.deque(state[i*row_size: i*row_size+row_size])
@@ -78,7 +75,8 @@ def shift_rows(state):
 def main(filename):
 	blocks = get_blocks_from_file(filename)
 	print(sub_bytes(blocks[-1]))
-	print(shift_rows((bytearray(blocks[-1]))))
+	print(blocks[0])
+	print(shift_rows(blocks[0]))
 
 
 if __name__ == '__main__':
