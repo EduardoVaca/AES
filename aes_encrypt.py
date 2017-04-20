@@ -45,10 +45,10 @@ def get_blocks_from_file(filename):
 		data = bytearray(file_content.read(BLOCK_SIZE))
 		if not data:
 			break
-		if len(data) < BLOCK_SIZE:		
+		if len(data) < BLOCK_SIZE:
 			data.append(1)
 			for _ in range(BLOCK_SIZE - len(data)):
-				data.append(0)			
+				data.append(0)
 		blocks.append(data)
 	return blocks
 
