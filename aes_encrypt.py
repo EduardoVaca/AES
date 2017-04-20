@@ -46,10 +46,9 @@ def get_blocks_from_file(filename):
 			mutable_bytes = bytearray(data)
 			mutable_bytes.append(1)
 			for _ in range(BLOCK_SIZE - len(mutable_bytes)):
-				mutable_bytes.append(0)			
-			data = bytes(mutable_bytes)	
-		print(data)		
-		blocks.append(data)		
+				mutable_bytes.append(0)
+			data = bytes(mutable_bytes)
+		blocks.append(data)
 	return blocks
 
 
@@ -61,10 +60,10 @@ def sub_bytes(state):
 		- List of 16 bytes with substitution applied.
 	"""
 	return [SBOX[x] for x in state]
-			
+
 
 def main(filename):
-	blocks = get_blocks_from_file(filename)	
+	blocks = get_blocks_from_file(filename)
 	print(sub_bytes(blocks[-1]))
 
 
