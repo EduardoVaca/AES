@@ -45,11 +45,11 @@ def get_blocks_from_file(filename):
 		data = bytearray(file_content.read(BLOCK_SIZE))
 		if not data:
 			break
-		if len(data) < BLOCK_SIZE:
-			data.append(1)
-			for _ in range(BLOCK_SIZE - len(data)):
-				data.append(0)
 		blocks.append(data)
+	if len(blocks[-1]) < BLOCK_SIZE:
+		blocks[-1] += bytearray([1] + [0 for _ in range(BLOCK_SIZE - len(blocks[-1]) - 1)])
+	else:		
+		blocks.append(bytearray([1] + [0 for _ in range(BLOCK_SIZE - 1)]))
 	return blocks
 
 
@@ -80,9 +80,9 @@ def shift_rows(state):
 
 def main(filename):
 	blocks = get_blocks_from_file(filename)
-	print(sub_bytes(blocks[-1]))
-	print(blocks[0])
-	print(shift_rows(blocks[0]))
+	print('Last block: {}'.format(blocks[-1]))
+	print('Subbytes: {}'.format(sub_bytes(blocks[-1])))	
+	print('Shift rows: {}'.format(shift_rows(blocks[-1])))
 
 
 if __name__ == '__main__':
