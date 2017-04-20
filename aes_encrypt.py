@@ -36,6 +36,8 @@ def get_blocks_from_file(filename):
 	If the last block is not of len 16 then 0x01, 0x00, 0x00... 0x00 is added.
 	Params:
 		- filename: Name of the file to be read
+	Returns:
+		- List of bytearrays representing each block.
 	"""
 	file_content = open(filename, 'rb')
 	blocks = []
@@ -54,18 +56,22 @@ def get_blocks_from_file(filename):
 def sub_bytes(state):
 	"""Apply simple substitution byte by byte using operantions in GF(2^8)
 	Params:
-		- state: List of 16 bytes.
+		- state: bytearray of 16 bytes.
 	Returns:
-		- List of 16 bytes with substitution applied.
+		- bytearray of 16 bytes with substitution applied.
 	"""
-	return [SBOX[x] for x in state]
+	return bytearray([SBOX[x] for x in state])
 
 
 def shift_rows(state):
 	"""Apply row shifting in a block of bytes (16 bytes)
+	Params:
+		- state: bytearray of 16 bytes.
+	Returns:
+		- bytearray of 16 bytes with shift applied.
 	"""	
 	row_size = 4
-	for i in range(4):
+	for i in range(row_size):
 		d = collections.deque(state[i*row_size: i*row_size+row_size])
 		d.rotate(i)
 		state[i*row_size: i*row_size+row_size] = list(d)
