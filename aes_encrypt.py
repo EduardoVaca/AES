@@ -6,6 +6,7 @@ Fernando Lobato
 Course: Information Security
 """
 import sys
+import collections
 
 BLOCK_SIZE = 16 # This is bytes
 SBOX = [0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,
@@ -53,7 +54,7 @@ def get_blocks_from_file(filename):
 
 
 def sub_bytes(state):
-	""" Apply simple substitution byte by byte using operantions in GF(2^8)
+	"""Apply simple substitution byte by byte using operantions in GF(2^8)
 	Params:
 		- state: List of 16 bytes.
 	Returns:
@@ -62,9 +63,22 @@ def sub_bytes(state):
 	return [SBOX[x] for x in state]
 
 
+def shift_rows(state):
+	"""Apply row shifting in a block of bytes (16 bytes)
+	"""
+	print(state[0:4])
+	row_size = 4
+	for i in range(4):
+		d = collections.deque(state[i*row_size: i*row_size+row_size])
+		d.rotate(i)
+		state[i*row_size: i*row_size+row_size] = list(d)
+	return state
+
+
 def main(filename):
 	blocks = get_blocks_from_file(filename)
 	print(sub_bytes(blocks[-1]))
+	print(shift_rows((bytearray(blocks[-1]))))
 
 
 if __name__ == '__main__':
