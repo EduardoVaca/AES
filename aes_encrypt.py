@@ -64,7 +64,8 @@ def sub_bytes(state):
 			
 
 def main(filename):
-	get_blocks_from_file(filename)	
+	blocks = get_blocks_from_file(filename)	
+	print(sub_bytes(blocks[-1]))
 
 
 if __name__ == '__main__':
