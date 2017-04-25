@@ -93,7 +93,7 @@ def mix_columns(state):
 		state[i + 2] = gmul(2, a2)^gmul(3, a3)^a0^a1
 		state[i + 3] = gmul(2, a3)^gmul(3, a0)^a1^a2
 	return state
-	
+
 
 def gmul(a, b):
 	"""Apply multiplication in GF(2^m) using Shift-and-add method.
@@ -114,7 +114,9 @@ def gmul(a, b):
 			b ^= 0x1b
 		a >>= 1
 		if (a & 1) == 1:
-			c ^= b		
+			c ^= b
+	if len(hex(c)) - 2 == 3:
+		c -= 256
 	return c
 
 
@@ -122,8 +124,14 @@ def main(filename):
 	blocks = get_blocks_from_file(filename)
 	print('Last block: {}'.format(blocks[-1]))
 	print('Subbytes: {}'.format(sub_bytes(blocks[-1])))	
-	print('Shift rows: {}'.format(shift_rows(blocks[-1])))
-	print('Mix columns: {}'.format(mix_columns(blocks[-1])))
+	print('Shift rows: {}'.format(shift_rows(blocks[-1])))	
+	test = [0x87, 0x6e, 0x46, 0xa6, 0xf2, 0x4c, 0xe7, 0x8c, 0x4d, 0x90, 0x4a, 0xd8, 0x97, 0xec, 0xc3, 0x95]
+	test = mix_columns(test)
+	print('Applying mixColumns to:')
+	print(test)
+	for e in test:
+		print(format(e, '02x'), end=' ')
+	print()
 
 
 if __name__ == '__main__':
