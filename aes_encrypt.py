@@ -77,12 +77,23 @@ def shift_rows(state):
 		state[i*row_size: i*row_size+row_size] = list(d)
 	return state
 
+
 def mix_columns(state):
 	"""Apply additions and multiplications in GF(2^8)
 	Params:
 		- state: bytearray of 16 bytes.
 	"""
-	return
+	for i in range(0, 16, 4):
+		a0 = state[i]
+		a1 = state[i + 1]
+		a2 = state[i + 2]
+		a3 = state[i + 3]
+		state[i] = gmul(2, a0)^gmul(3, a1)^a2^a3
+		state[i + 1] = gmul(2, a1)^gmul(3, a2)^a0^a3
+		state[i + 2] = gmul(2, a2)^gmul(3, a3)^a0^a1
+		state[i + 3] = gmul(2, a3)^gmul(3, a0)^a1^a2
+	return state
+	
 
 def gmul(a, b):
 	"""Apply multiplication in GF(2^m) using Shift-and-add method.
@@ -112,7 +123,7 @@ def main(filename):
 	print('Last block: {}'.format(blocks[-1]))
 	print('Subbytes: {}'.format(sub_bytes(blocks[-1])))	
 	print('Shift rows: {}'.format(shift_rows(blocks[-1])))
-	print('7: {}'.format(gmul(2, 7)))
+	print('Mix columns: {}'.format(mix_columns(blocks[-1])))
 
 
 if __name__ == '__main__':
