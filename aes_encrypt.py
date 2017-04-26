@@ -83,15 +83,15 @@ def mix_columns(state):
 	Params:
 		- state: bytearray of 16 bytes.
 	"""
-	for i in range(0, 16, 4):
+	for i in range(4):		
 		a0 = state[i]
-		a1 = state[i + 1]
-		a2 = state[i + 2]
-		a3 = state[i + 3]
-		state[i] = gmul(2, a0)^gmul(3, a1)^a2^a3
-		state[i + 1] = gmul(2, a1)^gmul(3, a2)^a0^a3
-		state[i + 2] = gmul(2, a2)^gmul(3, a3)^a0^a1
-		state[i + 3] = gmul(2, a3)^gmul(3, a0)^a1^a2
+		a1 = state[i + (1 * 4)]
+		a2 = state[i + (2 * 4)]
+		a3 = state[i + (3 * 4)]
+		state[i] = gmul(2, a0)^gmul(3, a1)^a2^a3		
+		state[i + (1 * 4)] = gmul(2, a1)^gmul(3, a2)^a0^a3
+		state[i + (2 * 4)] = gmul(2, a2)^gmul(3, a3)^a0^a1
+		state[i + (3 * 4)] = gmul(2, a3)^gmul(3, a0)^a1^a2
 	return state
 
 
@@ -136,9 +136,7 @@ def main(filename):
 	print_hex(test)
 	test = mix_columns(test)
 	print('After mixColumns')
-	print_hex(test)
-
-
+	print_hex(test)	
 
 
 if __name__ == '__main__':
