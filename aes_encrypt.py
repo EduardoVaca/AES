@@ -7,8 +7,10 @@ Course: Information Security
 """
 import sys
 import os
+import collections
 
 BLOCK_SIZE = 16 # This is bytes
+
 SBOX = 	[0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67,
             0x2b, 0xfe, 0xd7, 0xab, 0x76, 0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59,
             0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0, 0xb7,
@@ -42,54 +44,126 @@ def get_blocks_from_file(filename):
 	If the last block is not of len 16 then 0x01, 0x00, 0x00... 0x00 is added.
 	Params:
 		- filename: Name of the file to be read
+	Returns:
+		- List of bytearrays representing each block.
 	"""
 	file_content = open(filename, 'rb')
 	blocks = []
 	while True:
-		data = file_content.read(BLOCK_SIZE)
+		data = bytearray(file_content.read(BLOCK_SIZE))
 		if not data:
 			break
-		if len(data) < BLOCK_SIZE:
-			mutable_bytes = bytearray(data)
-			mutable_bytes.append(1)
-			for _ in range(BLOCK_SIZE - len(mutable_bytes)):
-				mutable_bytes.append(0)
-			data = bytes(mutable_bytes)
 		blocks.append(data)
+	if len(blocks[-1]) < BLOCK_SIZE:
+		blocks[-1] += bytearray([1] + [0 for _ in range(BLOCK_SIZE - len(blocks[-1]) - 1)])
+	else:		
+		blocks.append(bytearray([1] + [0 for _ in range(BLOCK_SIZE - 1)]))
 	return blocks
 
 
 def sub_bytes(state):
-	""" Apply simple substitution byte by byte using operantions in GF(2^8)
+	"""Apply simple substitution byte by byte using operantions in GF(2^8)
 	Params:
-		- state: List of 16 bytes.
+		- state: bytearray of 16 bytes.
 	Returns:
-		- List of 16 bytes with substitution applied.
+		- bytearray of 16 bytes with substitution applied.
 	"""
-	return [SBOX[x] for x in state]
+	return bytearray([SBOX[x] for x in state])
 
-def rotate(arr):
+
+def shift_rows(state):
+	"""Apply row shifting in a block of bytes (16 bytes)
+	Params:
+		- state: bytearray of 16 bytes.
+	Returns:
+		- bytearray of 16 bytes with shift applied.
+	"""	
+	row_size = 4
+	for i in range(row_size):
+		d = collections.deque(state[i*row_size: i*row_size+row_size])
+		d.rotate(i)
+		state[i*row_size: i*row_size+row_size] = list(d)
+	return state
+
+
+def mix_columns(state):
+	"""Apply additions and multiplications in GF(2^8)
+	Params:
+		- state: bytearray of 16 bytes.
+	"""
+	for i in range(0, 16, 4):
+		a0 = state[i]
+		a1 = state[i + 1]
+		a2 = state[i + 2]
+		a3 = state[i + 3]
+		state[i] = gmul(2, a0)^gmul(3, a1)^a2^a3
+		state[i + 1] = gmul(2, a1)^gmul(3, a2)^a0^a3
+		state[i + 2] = gmul(2, a2)^gmul(3, a3)^a0^a1
+		state[i + 3] = gmul(2, a3)^gmul(3, a0)^a1^a2
+	return state
+
+
+def gmul(a, b):
+	"""Apply multiplication in GF(2^m) using Shift-and-add method.
+	Params:
+		- a: Fist element for multiplication in the GF.
+		- b: Second element for the multiplication in the GF.
+	Returns:
+		- The result of multiplication.
+	"""
+	c = 0
+	if (a & 1) == 1:
+		c = b
+
+	for _ in range(1, 8):
+		hi_bit = (b & 0x80)
+		b <<= 1
+		b &= 0xff # Get rid of the most significant bit outside 2 bytes.
+		if hi_bit == 0x80:
+			b ^= 0x1b
+		a >>= 1
+		if (a & 1) == 1:
+			c ^= b
+	return c
+
+def rotate(sub_key):
 	""" Rotates the first column of a block for the expanded key
-	"""
-	temp = arr[:]
-	
-	arr[0] = temp[1]
-	arr[1] = temp[2]
-	arr[2] = temp[3]
-	arr[3] = temp[0]
+		
+		PARAMS
+		------
+			sub_key: list with bytes to rotate
 
-	return arr
+		RETURNS
+		-------
+			rotated list of bytes
+
+	"""
+	temp = sub_key[:]
+	
+	sub_key[0] = temp[1]
+	sub_key[1] = temp[2]
+	sub_key[2] = temp[3]
+	sub_key[3] = temp[0]
+
+	return sub_key
 
 def expand_key(key):
 	""" Expands a 16 byte key into a 176 byte key.
+		
+		PARAMS
+		------
+			key: a 16 byte random key in hex representation
+
+		RETURNS
+		-------
+			176 byte key in hex representation.
 	"""
 	expanded_key = []
+	[expanded_key.append(byte) for byte in key]
 	temp = bytearray(4)
 	
-	r_const = 0
-
-	[expanded_key.append(byte) for byte in key]
 	i = 16
+	r_const = 0
 
 	while(i < 176):
 
@@ -142,11 +216,19 @@ def main(filename):
 	random_key = generate_key()
 	# random_key = b'\x2b\x7e\x15\x16\x28\xae\xd2\xa6\xab\xf7\x15\x88\x09\xcf\x4f\x3c'
 	expanded_key = expand_key(random_key) 
-	
-
-
 
 	blocks = get_blocks_from_file(filename)
+
+	print('Last block: {}'.format(blocks[-1]))
+	print('Subbytes: {}'.format(sub_bytes(blocks[-1])))	
+	print('Shift rows: {}'.format(shift_rows(blocks[-1])))	
+	test = [0x87, 0x6e, 0x46, 0xa6, 0xf2, 0x4c, 0xe7, 0x8c, 0x4d, 0x90, 0x4a, 0xd8, 0x97, 0xec, 0xc3, 0x95]
+	test = mix_columns(test)
+	print('Applying mixColumns to:')
+	print(test)
+	for e in test:
+		print(format(e, '02x'), end=' ')
+	print()
 
 
 if __name__ == '__main__':
