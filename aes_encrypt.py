@@ -122,6 +122,21 @@ def mix_columns(state):
 	return state
 
 
+def add_round_key(state, key_block):
+	""" Apply XOR between the key_block and state
+
+		PARAMS
+		------
+			state: bytearray of 16 bytes.
+
+		
+		RETURNS
+		-------
+			state with XOR applied.
+	"""
+	return bytearray([(state[i]^key_block[i]) for i in range(16)])
+
+
 def gmul(a, b):
 	""" Apply multiplication in GF(2^m) using Shift-and-add method.
 		
@@ -244,7 +259,9 @@ def generate_key(num_bytes=16, int_representation=False):
 
 def main(filename):
 	print('Additional Testing using CRYPTOOL')
-	test = bytearray([0x19, 0xa0, 0x9a, 0xe9, 0x3d, 0xf4, 0xc6, 0xf8, 0xe3, 0xe2, 0x8d, 0x48, 0xbe, 0x2b, 0x2a, 0x08])
+	input_test = bytearray([0x32, 0x88, 0x31, 0xe0, 0x43, 0x5a, 0x31, 0x37, 0xf6, 0x30, 0x98, 0x07, 0xa8, 0x8d, 0xa2, 0x34])
+	key = bytearray([ 0x2b, 0x28, 0xab, 0x09, 0x7e, 0xae, 0xf7, 0xcf, 0x15, 0xd2, 0x15, 0x4f, 0x16, 0xa6, 0x88, 0x3c])
+	test = add_round_key(input_test, key)
 	print('Text')
 	print_hex(test)
 	test = sub_bytes(test)
