@@ -110,13 +110,12 @@ def gmul(a, b):
 	for _ in range(1, 8):
 		hi_bit = (b & 0x80)
 		b <<= 1
+		b &= 0xff # Get rid of the most significant bit outside 2 bytes.
 		if hi_bit == 0x80:
 			b ^= 0x1b
 		a >>= 1
 		if (a & 1) == 1:
 			c ^= b
-	if len(hex(c)) - 2 == 3:
-		c -= 256
 	return c
 
 
