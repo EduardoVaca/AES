@@ -263,28 +263,41 @@ def generate_key(num_bytes=16, int_representation=False):
 	return random_key
 
 
+def aes_cipher(block,  expanded_key):
+	""" Apply AES cipher to a block
+
+		PARAMS
+		------
+			block: bytearray of 16 bytes.
+			expanded_key: key expanded in 176 bytes.
+
+		RETURNS
+		-------
+			block encrypted with AES.
+	"""
+	state = block
+	state = add_round_key(state, expanded_key[0:16])
+
+	for aes_round in range(1, 10):	
+		state = sub_bytes(state)
+		state = shift_rows(state)
+		state = mix_columns(state)
+		state = add_round_key(state, expanded_key[aes_round*16: aes_round*16+16])
+
+	state = sub_bytes(state)
+	state = shift_rows(state)
+	state = add_round_key(state, expanded_key[160: 176])
+
+	return state
+
+
+
 def main(filename):
-	print('Additional Testing using CRYPTOOL')
+	#random_key = generate_key()
 	input_test = bytearray([0x32, 0x88, 0x31, 0xe0, 0x43, 0x5a, 0x31, 0x37, 0xf6, 0x30, 0x98, 0x07, 0xa8, 0x8d, 0xa2, 0x34])
 	key = bytearray([ 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x9, 0xcf, 0x4f, 0x3c])
-	test = add_round_key(input_test, key)
-	print('Text')
-	print_hex(test)
-	test = sub_bytes(test)
-	print('After subBytes')
-	print_hex(test)
-	test = shift_rows(test)
-	print('After shiftrows')
-	print_hex(test)
-	test = mix_columns(test)
-	print('After mixColumns')
-	print_hex(test)
-
-	""" Generate Key
-	"""
-	#random_key = generate_key()
-	random_key = b'\x2b\x7e\x15\x16\x28\xae\xd2\xa6\xab\xf7\x15\x88\x09\xcf\x4f\x3c'
-	expanded_key = expand_key(random_key)
+	expanded_key = expand_key(key)
+	print_hex(aes_cipher(input_test, bytearray(expanded_key)))
 
 
 if __name__ == '__main__':
