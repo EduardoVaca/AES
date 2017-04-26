@@ -41,11 +41,15 @@ RCON = [0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1b,0x36]
 
 def get_blocks_from_file(filename):
 	"""Generate 16 byte blocks from file.
-	If the last block is not of len 16 then 0x01, 0x00, 0x00... 0x00 is added.
-	Params:
-		- filename: Name of the file to be read
-	Returns:
-		- List of bytearrays representing each block.
+		If the last block is not of len 16 then 0x01, 0x00, 0x00... 0x00 is added.
+	
+		PARAMS
+		------
+			filename: Name of the file to be read
+		
+		RETURNS
+		-------
+			list of bytearrays representing each block.
 	"""
 	file_content = open(filename, 'rb')
 	blocks = []
@@ -63,20 +67,28 @@ def get_blocks_from_file(filename):
 
 def sub_bytes(state):
 	"""Apply simple substitution byte by byte using operantions in GF(2^8)
-	Params:
-		- state: bytearray of 16 bytes.
-	Returns:
-		- bytearray of 16 bytes with substitution applied.
+		
+		PARAMS
+		------
+			state: bytearray of 16 bytes.
+		
+		RETURNS
+		-------
+			bytearray of 16 bytes with substitution applied.
 	"""
 	return bytearray([SBOX[x] for x in state])
 
 
 def shift_rows(state):
 	"""Apply row shifting in a block of bytes (16 bytes)
-	Params:
-		- state: bytearray of 16 bytes.
-	Returns:
-		- bytearray of 16 bytes with shift applied.
+	
+		PARAMS
+		------
+			state: bytearray of 16 bytes.
+
+		RETURNS
+		-------
+			bytearray of 16 bytes with shift applied.
 	"""	
 	row_size = 4
 	for i in range(row_size):
@@ -87,9 +99,16 @@ def shift_rows(state):
 
 
 def mix_columns(state):
-	"""Apply additions and multiplications in GF(2^8)
-	Params:
-		- state: bytearray of 16 bytes.
+	""" Apply additions and multiplications in GF(2^8)
+		
+		PARAMS
+		------
+			state: bytearray of 16 bytes.
+
+
+		RETURNS
+		-------
+			state with mixed columns
 	"""
 	for i in range(4):		
 		a0 = state[i]
@@ -104,12 +123,16 @@ def mix_columns(state):
 
 
 def gmul(a, b):
-	"""Apply multiplication in GF(2^m) using Shift-and-add method.
-	Params:
-		- a: Fist element for multiplication in the GF.
-		- b: Second element for the multiplication in the GF.
-	Returns:
-		- The result of multiplication.
+	""" Apply multiplication in GF(2^m) using Shift-and-add method.
+		
+		PARAMS
+		------
+			a: Fist element for multiplication in the GF.
+			b: Second element for the multiplication in the GF.
+
+		RETURNS
+		-------
+			the result of multiplication.
 	"""
 	c = 0
 	if (a & 1) == 1:
