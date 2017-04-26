@@ -134,7 +134,13 @@ def add_round_key(state, key_block):
 		-------
 			state with XOR applied.
 	"""
-	return bytearray([(state[i]^key_block[i]) for i in range(16)])
+	i = 0
+	for j in range(4):
+		state[i] ^= key_block[j]; i += 1		
+		state[i] ^= key_block[j + (1 * 4)]; i += 1		
+		state[i] ^= key_block[j + (2 * 4)]; i += 1		
+		state[i] ^= key_block[j + (3 * 4)]; i += 1		
+	return state
 
 
 def gmul(a, b):
@@ -260,7 +266,7 @@ def generate_key(num_bytes=16, int_representation=False):
 def main(filename):
 	print('Additional Testing using CRYPTOOL')
 	input_test = bytearray([0x32, 0x88, 0x31, 0xe0, 0x43, 0x5a, 0x31, 0x37, 0xf6, 0x30, 0x98, 0x07, 0xa8, 0x8d, 0xa2, 0x34])
-	key = bytearray([ 0x2b, 0x28, 0xab, 0x09, 0x7e, 0xae, 0xf7, 0xcf, 0x15, 0xd2, 0x15, 0x4f, 0x16, 0xa6, 0x88, 0x3c])
+	key = bytearray([ 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x9, 0xcf, 0x4f, 0x3c])
 	test = add_round_key(input_test, key)
 	print('Text')
 	print_hex(test)
@@ -276,10 +282,9 @@ def main(filename):
 
 	""" Generate Key
 	"""
-	random_key = generate_key()
-	# random_key = b'\x2b\x7e\x15\x16\x28\xae\xd2\xa6\xab\xf7\x15\x88\x09\xcf\x4f\x3c'
+	#random_key = generate_key()
+	random_key = b'\x2b\x7e\x15\x16\x28\xae\xd2\xa6\xab\xf7\x15\x88\x09\xcf\x4f\x3c'
 	expanded_key = expand_key(random_key)
-	print(expanded_key)
 
 
 if __name__ == '__main__':
