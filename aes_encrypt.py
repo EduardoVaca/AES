@@ -73,7 +73,7 @@ def shift_rows(state):
 	row_size = 4
 	for i in range(row_size):
 		d = collections.deque(state[i*row_size: i*row_size+row_size])
-		d.rotate(i)
+		d.rotate(-i)
 		state[i*row_size: i*row_size+row_size] = list(d)
 	return state
 
@@ -118,19 +118,27 @@ def gmul(a, b):
 			c ^= b
 	return c
 
+def print_hex(test):
+	for t in test:
+		print(hex(t), end=' ')
+	print()
 
 def main(filename):
-	blocks = get_blocks_from_file(filename)
-	print('Last block: {}'.format(blocks[-1]))
-	print('Subbytes: {}'.format(sub_bytes(blocks[-1])))	
-	print('Shift rows: {}'.format(shift_rows(blocks[-1])))	
-	test = [0x87, 0x6e, 0x46, 0xa6, 0xf2, 0x4c, 0xe7, 0x8c, 0x4d, 0x90, 0x4a, 0xd8, 0x97, 0xec, 0xc3, 0x95]
+	print('Additional Testing using CRYPTOOL')
+	test = bytearray([0x19, 0xa0, 0x9a, 0xe9, 0x3d, 0xf4, 0xc6, 0xf8, 0xe3, 0xe2, 0x8d, 0x48, 0xbe, 0x2b, 0x2a, 0x08])
+	print('Text')
+	print_hex(test)
+	test = sub_bytes(test)
+	print('After subBytes')
+	print_hex(test)
+	test = shift_rows(test)
+	print('After shiftrows')
+	print_hex(test)
 	test = mix_columns(test)
-	print('Applying mixColumns to:')
-	print(test)
-	for e in test:
-		print(format(e, '02x'), end=' ')
-	print()
+	print('After mixColumns')
+	print_hex(test)
+
+
 
 
 if __name__ == '__main__':
