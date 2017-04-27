@@ -291,13 +291,42 @@ def aes_cipher(block,  expanded_key):
 	return state
 
 
+def cipher_document_cbc(blocks, expanded_key):
+	""" Apply AES cipher to the blocks obtained in the document.
+		Uses Cipher Block Chaining
+
+		PARAMS
+		------
+			blocks: List of blocks made of 16 bytes.
+
+		RETURNS
+		-------
+			AES cipher.
+	"""
+	v = bytearray([0x0 for _ in range(16)])
+	for i in range(len(blocks)):
+		if i > 0:
+			v = blocks[i - 1]
+		blocks[i] = bytearray([blocks[i][j]^v[j] for j in range(16)])
+		blocks[i] = aes_cipher(blocks[i], expanded_key)
+	return blocks
 
 def main(filename):
 	#random_key = generate_key()
-	input_test = bytearray([0x32, 0x88, 0x31, 0xe0, 0x43, 0x5a, 0x31, 0x37, 0xf6, 0x30, 0x98, 0x07, 0xa8, 0x8d, 0xa2, 0x34])
-	key = bytearray([ 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x9, 0xcf, 0x4f, 0x3c])
-	expanded_key = expand_key(key)
-	print_hex(aes_cipher(input_test, bytearray(expanded_key)))
+	#key = bytearray([ 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x9, 0xcf, 0x4f, 0x3c])
+	key = bytearray([0x0 for _ in range(16)])
+	print('KEY')
+	print_hex(key)
+	print()
+	expanded_key = bytearray(expand_key(key))
+	blocks = get_blocks_from_file(filename)
+	for b in blocks:
+		print_hex(b)
+	print()
+	blocks = cipher_document_cbc(blocks, expanded_key)
+	for b in blocks:
+		print_hex(b)
+	
 
 
 if __name__ == '__main__':
