@@ -309,7 +309,21 @@ def cipher_document_cbc(blocks, expanded_key):
 			v = blocks[i - 1]
 		blocks[i] = bytearray([blocks[i][j]^v[j] for j in range(16)])
 		blocks[i] = aes_cipher(blocks[i], expanded_key)
+		blocks[i] = change_order_based_on_columns(blocks[i])
+		print('Block {}'.format(i))
+		print_hex(blocks[i])
 	return blocks
+
+
+def change_order_based_on_columns(state):
+	result = [0x0 for _ in range(16)]
+	j = 0
+	for i in range(4):
+		result[j] = state[i]; j+=1
+		result[j] = state[i + (1 * 4)]; j+=1
+		result[j] = state[i + (2 * 4)]; j+=1
+		result[j] = state[i + (3 * 4)]; j+=1
+	return bytearray(result)
 
 def main(filename):
 	#random_key = generate_key()
