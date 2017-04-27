@@ -79,7 +79,7 @@ def sub_bytes(state):
 	return bytearray([SBOX[x] for x in state])
 
 
-def change_order_based_between_col_rows(state):
+def change_order_between_cols_rows(state):
 	""" Change the order of the array between cols and rows of its matrix representation.
 
 		PARAMS
@@ -111,13 +111,13 @@ def shift_rows(state):
 		-------
 			bytearray of 16 bytes with shift applied.
 	"""
-	state = change_order_based_between_col_rows(state)
+	state = change_order_between_cols_rows(state)
 	row_size = 4
 	for i in range(row_size):
 		d = collections.deque(state[i*row_size: i*row_size+row_size])
 		d.rotate(-i)
 		state[i*row_size: i*row_size+row_size] = list(d)
-	return change_order_based_between_col_rows(state)
+	return change_order_between_cols_rows(state)
 
 
 def mix_columns(state):
