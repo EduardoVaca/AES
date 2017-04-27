@@ -79,6 +79,27 @@ def sub_bytes(state):
 	return bytearray([SBOX[x] for x in state])
 
 
+def change_order_based_between_col_rows(state):
+	""" Change the order of the array between cols and rows of its matrix representation.
+
+		PARAMS
+		------
+			state: state: bytearray of 16 bytes.
+
+		RETURNS
+		-------
+			state with its cols and rows changed.
+	"""
+	result = [0x0 for _ in range(16)]
+	j = 0
+	for i in range(4):
+		result[j] = state[i]; j+=1
+		result[j] = state[i + (1 * 4)]; j+=1
+		result[j] = state[i + (2 * 4)]; j+=1
+		result[j] = state[i + (3 * 4)]; j+=1
+	return bytearray(result)
+
+
 def shift_rows(state):
 	"""Apply row shifting in a block of bytes (16 bytes)
 	
@@ -89,13 +110,14 @@ def shift_rows(state):
 		RETURNS
 		-------
 			bytearray of 16 bytes with shift applied.
-	"""	
+	"""
+	state = change_order_based_between_col_rows(state)
 	row_size = 4
 	for i in range(row_size):
 		d = collections.deque(state[i*row_size: i*row_size+row_size])
 		d.rotate(-i)
 		state[i*row_size: i*row_size+row_size] = list(d)
-	return state
+	return change_order_based_between_col_rows(state)
 
 
 def mix_columns(state):
@@ -303,21 +325,11 @@ def cipher_document_cbc(blocks, expanded_key):
 			v = blocks[i - 1]
 		blocks[i] = bytearray([blocks[i][j]^v[j] for j in range(16)])
 		blocks[i] = aes_cipher(blocks[i], expanded_key)
-		blocks[i] = change_order_based_on_columns(blocks[i])
+		blocks[i] = change_order_based_between_col_rows(blocks[i])
 		print('Block {}'.format(i))
 		print_hex(blocks[i])
 	return blocks
 
-
-def change_order_based_on_columns(state):
-	result = [0x0 for _ in range(16)]
-	j = 0
-	for i in range(4):
-		result[j] = state[i]; j+=1
-		result[j] = state[i + (1 * 4)]; j+=1
-		result[j] = state[i + (2 * 4)]; j+=1
-		result[j] = state[i + (3 * 4)]; j+=1
-	return bytearray(result)
 
 def main(filename):
 	#random_key = generate_key()
@@ -333,6 +345,14 @@ def main(filename):
 	print()
 	print('After add_round_key')
 	test = add_round_key(test, key)
+	print_hex(test)
+	print()
+	print('After sub_bytes')
+	test = sub_bytes(test)
+	print_hex(test)
+	print()
+	print('After shift_rows')
+	test = shift_rows(test)
 	print_hex(test)
 	print()
 	
