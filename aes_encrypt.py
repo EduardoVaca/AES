@@ -325,27 +325,22 @@ def cipher_document_cbc(blocks, expanded_key):
 			v = blocks[i - 1]
 		blocks[i] = bytearray([blocks[i][j]^v[j] for j in range(16)])
 		blocks[i] = aes_cipher(blocks[i], expanded_key)
-		blocks[i] = change_order_based_between_col_rows(blocks[i])
-		print('Block {}'.format(i))
-		print_hex(blocks[i])
 	return blocks
 
 
 def main(filename):
 	#random_key = generate_key()
-	key = bytearray([ 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x9, 0xcf, 0x4f, 0x3c])
-	#key = bytearray([0x0 for _ in range(16)])
+	#key = bytearray([ 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x9, 0xcf, 0x4f, 0x3c])
+	key = bytearray([0x0 for _ in range(16)])
 	print('KEY')
 	print_hex(key)
 	print()
 	expanded_key = bytearray(expand_key(key))
-	test = bytearray([0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34])
-	print('TEXT')
-	print_hex(test)
+	blocks = get_blocks_from_file(filename)
+	blocks = cipher_document_cbc(blocks, expanded_key)
+	for b in blocks:
+		print_hex(b)
 	print()
-	print('AFTER ROUND')
-	test = aes_cipher(test, expanded_key)
-	print_hex(test)
 	
 
 
