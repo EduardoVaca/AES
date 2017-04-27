@@ -329,13 +329,13 @@ def cipher_document_cbc(blocks, expanded_key):
 
 
 def main(filename):
-	#random_key = generate_key()
+	random_key = generate_key()
 	#key = bytearray([ 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x9, 0xcf, 0x4f, 0x3c])
-	key = bytearray([0x0 for _ in range(16)])
+	#key = bytearray([0x0 for _ in range(16)])
 	print('KEY')
-	print_hex(key)
+	print_hex(random_key)
 	print()
-	expanded_key = bytearray(expand_key(key))
+	expanded_key = bytearray(expand_key(random_key))
 	blocks = get_blocks_from_file(filename)
 	blocks = cipher_document_cbc(blocks, expanded_key)
 	for b in blocks:
