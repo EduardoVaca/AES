@@ -134,13 +134,7 @@ def add_round_key(state, key_block):
 		-------
 			state with XOR applied.
 	"""
-	i = 0
-	for j in range(4):
-		state[i] ^= key_block[j]; i += 1		
-		state[i] ^= key_block[j + (1 * 4)]; i += 1		
-		state[i] ^= key_block[j + (2 * 4)]; i += 1		
-		state[i] ^= key_block[j + (3 * 4)]; i += 1		
-	return state
+	return bytearray([state[i]^key_block[i] for i in range(16)])
 
 
 def gmul(a, b):
@@ -327,19 +321,20 @@ def change_order_based_on_columns(state):
 
 def main(filename):
 	#random_key = generate_key()
-	#key = bytearray([ 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x9, 0xcf, 0x4f, 0x3c])
-	key = bytearray([0x0 for _ in range(16)])
+	key = bytearray([ 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x9, 0xcf, 0x4f, 0x3c])
+	#key = bytearray([0x0 for _ in range(16)])
 	print('KEY')
 	print_hex(key)
 	print()
 	expanded_key = bytearray(expand_key(key))
-	blocks = get_blocks_from_file(filename)
-	for b in blocks:
-		print_hex(b)
+	test = bytearray([0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34])
+	print('TEXT')
+	print_hex(test)
 	print()
-	blocks = cipher_document_cbc(blocks, expanded_key)
-	for b in blocks:
-		print_hex(b)
+	print('After add_round_key')
+	test = add_round_key(test, key)
+	print_hex(test)
+	print()
 	
 
 
