@@ -62,7 +62,21 @@ def get_blocks_from_file(filename):
 		blocks[-1] += bytearray([1] + [0 for _ in range(BLOCK_SIZE - len(blocks[-1]) - 1)])
 	else:		
 		blocks.append(bytearray([1] + [0 for _ in range(BLOCK_SIZE - 1)]))
+	file_content.close()
 	return blocks
+
+
+def write_blocks_in_file(blocks, filename):
+	""" Write ciphered blocks in a new file.
+		PARAMS		
+		------
+			blocks: ciphered blocks of 16 bytes each.
+			filename: name of original file.
+	"""
+	file_blocks = open('cipher.txt', 'wb')
+	for block in blocks:
+		file_blocks.write(block)
+	file_blocks.close()
 
 
 def sub_bytes(state):
@@ -341,6 +355,7 @@ def main(filename):
 	for b in blocks:
 		print_hex(b)
 	print()
+	write_blocks_in_file(blocks, filename)
 	
 
 
