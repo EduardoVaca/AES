@@ -66,7 +66,7 @@ def get_blocks_from_file(filename):
 	return blocks
 
 
-def write_blocks_in_file(blocks, filename):
+def write_blocks_in_file(blocks):
 	""" Write ciphered blocks in a new file.
 		PARAMS		
 		------
@@ -225,6 +225,9 @@ def gmul(a, b):
 
 
 def print_hex(test):
+	""" Print block in hex format.
+		Use for debugging.
+	"""
 	for t in test:
 		print(hex(t), end=' ')
 	print()
@@ -370,7 +373,7 @@ def main(filename):
 	expanded_key = bytearray(expand_key(random_key))
 	blocks = get_blocks_from_file(filename)
 	blocks = cipher_document_cbc(blocks, expanded_key)
-	write_blocks_in_file(blocks, filename)
+	write_blocks_in_file(blocks)
 	write_ext_and_key_in_file(filename, expanded_key)	
 	print('Your file has been encrypted with AES!\n')
 	print('KEY')

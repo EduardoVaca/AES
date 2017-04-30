@@ -240,6 +240,9 @@ def decipher_document_cbc(blocks, expanded_key):
 
 
 def print_hex(test):
+	""" Print block in hex format.
+		Use for debugging.
+	"""
 	for t in test:
 		print(hex(t), end=' ')
 	print()
