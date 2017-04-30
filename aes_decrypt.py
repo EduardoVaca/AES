@@ -1,3 +1,8 @@
+"""
+AES Decryption implementation
+Author: Eduardo Vaca
+Course: Information Security
+"""
 import sys
 import collections
 import itertools

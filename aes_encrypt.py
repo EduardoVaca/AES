@@ -1,8 +1,7 @@
 """
-AES Cipher implementation
-Eduardo Vaca
-A01207563
-Fernando Lobato
+AES Encryption implementation
+Author: Eduardo Vaca
+Contributor: Fernando Lobato
 Course: Information Security
 """
 import sys
