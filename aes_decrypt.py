@@ -37,6 +37,18 @@ def get_expanded_key_from_file():
 	return bytearray(data)
 
 
+def get_file_ext_from_file():
+	""" Get the file extension from the file generated in encryption AES.
+		RETURNS
+		-------
+			file extension.
+	"""
+	file_content = open('cipher_ext.txt', 'r')
+	ext = file_content.read()
+	file_content.close()
+	return ext
+
+
 def get_blocks_from_file():
 	""" Gets the ciphered blocks from the file generated in encryption AES.
 		RETURNS
@@ -233,23 +245,30 @@ def print_hex(test):
 	print()
 
 
+def write_blocks_in_file(blocks, ext):
+	""" Write ciphered blocks in a new file.
+		PARAMS		
+		------
+			blocks: ciphered blocks of 16 bytes each.			
+	"""
+	file_blocks = open('result.' + ext, 'wb')
+	for block in blocks:
+		file_blocks.write(block)
+	file_blocks.close()
+
+
 def main(filename):
 	"""file_content = open(filename, 'rb')
 	data = file_content.read()
 	print_hex(data)"""
+	ext = get_file_ext_from_file()
 	blocks = get_blocks_from_file()
 	for b in blocks:
 		print_hex(b)
 	print()
 	expanded_key = get_expanded_key_from_file()
 	blocks = decipher_document_cbc(blocks, expanded_key)
-	for b in blocks:
-		print(b)
-	print()
-
-	result = list(itertools.chain.from_iterable(blocks))
-	result_str = ''.join(str(chr(e)) for e in result)
-	print(result_str)
+	write_blocks_in_file(blocks, ext)
 
 	
 
