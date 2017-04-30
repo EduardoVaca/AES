@@ -72,6 +72,58 @@ def inv_add_round_key(state, key_block):
 	return bytearray([state[i]^key_block[i] for i in range(16)])
 
 
+def inv_mix_columns(state):
+	""" Apply additions and multiplications in GF(2^8)
+		
+		PARAMS
+		------
+			state: bytearray of 16 bytes.
+
+
+		RETURNS
+		-------
+			state with mixed columns
+	"""
+	for i in range(0, 16, 4):		
+		a0 = state[i]
+		a1 = state[i + 1]
+		a2 = state[i + 2]
+		a3 = state[i + 3]
+		state[i] = gmul(14, a0)^gmul(11, a1)^gmul(13, a2)^gmul(9, a3)		
+		state[i + 1] = gmul(9, a0)^gmul(14, a1)^gmul(11, a2)^gmul(13, a3)
+		state[i + 2] = gmul(13, a0)^gmul(9, a1)^gmul(14, a2)^gmul(11, a3)
+		state[i + 3] = gmul(11, a0)^gmul(13, a1)^gmul(9, a2)^gmul(14, a3)
+	return state
+
+
+def gmul(a, b):
+	""" Apply multiplication in GF(2^m) using Shift-and-add method.
+		
+		PARAMS
+		------
+			a: Fist element for multiplication in the GF.
+			b: Second element for the multiplication in the GF.
+
+		RETURNS
+		-------
+			the result of multiplication.
+	"""
+	c = 0
+	if (a & 1) == 1:
+		c = b
+
+	for _ in range(1, 8):
+		hi_bit = (b & 0x80)
+		b <<= 1
+		b &= 0xff # Get rid of the most significant bit outside 2 bytes.
+		if hi_bit == 0x80:
+			b ^= 0x1b
+		a >>= 1
+		if (a & 1) == 1:
+			c ^= b
+	return c
+
+
 def change_order_between_cols_rows(state):
 	""" Change the order of the array between cols and rows of its matrix representation.
 
@@ -115,6 +167,9 @@ def main(filename):
 	key = bytearray([0xac, 0x77, 0x66, 0xf3, 0x19, 0xfa, 0xdc, 0x21, 0x28, 0xd1, 0x29, 0x41, 0x57, 0x5c, 0x00, 0x6e])
 	print('After inv add round key')
 	test = inv_add_round_key(test, key)
+	print_hex(test)
+	print('After inv mix cols')
+	test = inv_mix_columns(test)
 	print_hex(test)
 
 if __name__ == '__main__':
