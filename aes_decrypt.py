@@ -2,6 +2,8 @@ import sys
 import collections
 
 
+BLOCK_SIZE = 16 # This is bytes
+
 INV_SBOX = [0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e,
 			0x81, 0xf3, 0xd7, 0xfb, 0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e,
 			0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb, 0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d,
@@ -21,6 +23,34 @@ INV_SBOX = [0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x
 			0x9c, 0xef, 0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c,
 			0x83, 0x53, 0x99, 0x61, 0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69,
 			0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d]
+
+def get_expanded_key_from_file():
+	""" Gets the expanded key from the file generated in encryption AES.
+		RETURNS
+		-------
+			expanded_key as bytearray.
+	"""
+	file_content = open('cipher_key.txt', 'rb')
+	data = file_content.read()
+	file_content.close()
+	return bytearray(data)
+
+
+def get_blocks_from_file():
+	""" Gets the ciphered blocks from the file generated in encryption AES.
+		RETURNS
+		-------
+			ciphered blocks.
+	"""
+	file_content = open('cipher.txt', 'rb')
+	blocks = []
+	while True:
+		data = bytearray(file_content.read(BLOCK_SIZE))
+		if not data:
+			break
+		blocks.append(data)
+	file_content.close()
+	return blocks
 
 
 def inv_shift_rows(state):
@@ -145,6 +175,57 @@ def change_order_between_cols_rows(state):
 	return bytearray(result)
 
 
+def aes_decipher(block,  expanded_key):
+	""" Apply AES decipher to a block
+
+		PARAMS
+		------
+			block: bytearray of 16 bytes.
+			expanded_key: key expanded in 176 bytes.
+
+		RETURNS
+		-------
+			block encrypted with AES.
+	"""
+	state = block
+	state = inv_add_round_key(state, expanded_key[160:176])
+
+	for aes_round in range(9, 0, -1):	
+		state = inv_shift_rows(state)
+		state = inv_sub_bytes(state)
+		state = inv_add_round_key(state, expanded_key[aes_round*16: aes_round*16+16])
+		state = inv_mix_columns(state)
+		
+
+	state = inv_shift_rows(state)
+	state = inv_sub_bytes(state)
+	state = inv_add_round_key(state, expanded_key[0: 16])
+
+	return state
+
+
+def decipher_document_cbc(blocks, expanded_key):
+	""" Apply AES cipher to decrypt the blocks obtained in the document.
+		Uses Cipher Block Chaining
+
+		PARAMS
+		------
+			blocks: List of blocks made of 16 bytes.
+
+		RETURNS
+		-------
+			AES cipher.
+	"""
+	v = bytearray([0x0 for _ in range(16)])
+	for i in range(len(blocks)):
+		if i > 0:
+			v = past_block
+		past_block = [x for x in blocks[i]]	
+		blocks[i] = aes_decipher(blocks[i], expanded_key)
+		blocks[i] = bytearray([blocks[i][j]^v[j] for j in range(16)])
+	return blocks
+
+
 def print_hex(test):
 	for t in test:
 		print(hex(t), end=' ')
@@ -155,22 +236,16 @@ def main(filename):
 	"""file_content = open(filename, 'rb')
 	data = file_content.read()
 	print_hex(data)"""
-	test = bytearray([0xe2, 0x57, 0x0f, 0x00, 0x41, 0xb4, 0x15, 0x04, 0xd0, 0x0e, 0x94, 0x6a, 0x56, 0x54, 0x0b, 0x92])
-	print('TEXT')
-	print_hex(test)
-	print('After inv shift rows')
-	test = inv_shift_rows(test)
-	print_hex(test)
-	print('After inv sub bytes')
-	test = inv_sub_bytes(test)
-	print_hex(test)
-	key = bytearray([0xac, 0x77, 0x66, 0xf3, 0x19, 0xfa, 0xdc, 0x21, 0x28, 0xd1, 0x29, 0x41, 0x57, 0x5c, 0x00, 0x6e])
-	print('After inv add round key')
-	test = inv_add_round_key(test, key)
-	print_hex(test)
-	print('After inv mix cols')
-	test = inv_mix_columns(test)
-	print_hex(test)
+	blocks = get_blocks_from_file()
+	for b in blocks:
+		print_hex(b)
+	print()
+	expanded_key = get_expanded_key_from_file()
+	blocks = decipher_document_cbc(blocks, expanded_key)
+	for b in blocks:
+		print(b)
+
+	
 
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
