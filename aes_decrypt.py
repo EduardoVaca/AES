@@ -57,6 +57,21 @@ def inv_sub_bytes(state):
 	return bytearray([INV_SBOX[x] for x in state])
 
 
+def inv_add_round_key(state, key_block):
+	""" Apply XOR between the key_block and state
+
+		PARAMS
+		------
+			state: bytearray of 16 bytes.
+
+		
+		RETURNS
+		-------
+			state with XOR applied.
+	"""
+	return bytearray([state[i]^key_block[i] for i in range(16)])
+
+
 def change_order_between_cols_rows(state):
 	""" Change the order of the array between cols and rows of its matrix representation.
 
@@ -96,6 +111,10 @@ def main(filename):
 	print_hex(test)
 	print('After inv sub bytes')
 	test = inv_sub_bytes(test)
+	print_hex(test)
+	key = bytearray([0xac, 0x77, 0x66, 0xf3, 0x19, 0xfa, 0xdc, 0x21, 0x28, 0xd1, 0x29, 0x41, 0x57, 0x5c, 0x00, 0x6e])
+	print('After inv add round key')
+	test = inv_add_round_key(test, key)
 	print_hex(test)
 
 if __name__ == '__main__':
