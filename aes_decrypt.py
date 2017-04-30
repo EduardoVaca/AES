@@ -245,16 +245,31 @@ def print_hex(test):
 	print()
 
 
-def write_blocks_in_file(blocks, ext):
+def write_blocks_in_file(blocks, ext, last_valid_index):
 	""" Write ciphered blocks in a new file.
 		PARAMS		
 		------
 			blocks: ciphered blocks of 16 bytes each.			
 	"""
 	file_blocks = open('result.' + ext, 'wb')
-	for block in blocks:
-		file_blocks.write(block)
+	for i in range(len(blocks)):
+		if i < len(blocks) - 1:
+			file_blocks.write(blocks[i])
+		else:
+			file_blocks.write(blocks[i][:last_valid_index])
 	file_blocks.close()
+
+
+def get_last_valid_byte_index(block):
+	""" Get the index of the last byte 01
+		RETURNS
+		-------
+			index of last byte 01.
+	"""
+	for i in range(BLOCK_SIZE):
+		if block[i] == 0x01:
+			return i
+	return 0
 
 
 def main(filename):
@@ -268,7 +283,7 @@ def main(filename):
 	print()
 	expanded_key = get_expanded_key_from_file()
 	blocks = decipher_document_cbc(blocks, expanded_key)
-	write_blocks_in_file(blocks, ext)
+	write_blocks_in_file(blocks, ext, get_last_valid_byte_index(blocks[-1]))
 
 	
 
