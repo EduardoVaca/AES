@@ -272,23 +272,16 @@ def get_last_valid_byte_index(block):
 	return 0
 
 
-def main(filename):
-	"""file_content = open(filename, 'rb')
-	data = file_content.read()
-	print_hex(data)"""
+def main():
 	ext = get_file_ext_from_file()
 	blocks = get_blocks_from_file()
-	for b in blocks:
-		print_hex(b)
-	print()
 	expanded_key = get_expanded_key_from_file()
 	blocks = decipher_document_cbc(blocks, expanded_key)
 	write_blocks_in_file(blocks, ext, get_last_valid_byte_index(blocks[-1]))
+	print('Your file has been decrypted!\n')
+	print('Please check file: result.{}'.format(ext))
 
 	
 
 if __name__ == '__main__':
-	if len(sys.argv) < 2:
-		sys.exit('Usage: %s: [filename]' % sys.argv[0])
-	else:
-		main(sys.argv[1])
+	main()
