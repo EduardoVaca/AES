@@ -79,6 +79,29 @@ def write_blocks_in_file(blocks, filename):
 	file_blocks.close()
 
 
+def write_ext_and_key_in_file(filename, key_extended):
+	""" Write file extension and key in temporal file.
+		PARAMS
+		------
+			filename: Name of the ciphered file.
+			key: key extended used to cipher file.
+	"""
+	ext_chars = []
+	for c in filename[::-1]:
+		if c != '.':
+			ext_chars.append(c)
+		else:
+			break
+	ext = ''.join(ext_chars[::-1])
+	file_ext = open('cipher_ext.txt', 'w')
+	file_ext.write(ext)
+	file_key = open('cipher_key.txt', 'wb')
+	file_key.write(key_extended)
+	file_ext.close()
+	file_key.close()
+	
+
+
 def sub_bytes(state):
 	"""Apply simple substitution byte by byte using operantions in GF(2^8)
 		
@@ -356,6 +379,8 @@ def main(filename):
 		print_hex(b)
 	print()
 	write_blocks_in_file(blocks, filename)
+
+	write_ext_and_key_in_file(filename, expanded_key)	
 	
 
 
