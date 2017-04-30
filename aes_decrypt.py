@@ -1,5 +1,6 @@
 import sys
 import collections
+import itertools
 
 
 BLOCK_SIZE = 16 # This is bytes
@@ -244,6 +245,11 @@ def main(filename):
 	blocks = decipher_document_cbc(blocks, expanded_key)
 	for b in blocks:
 		print(b)
+	print()
+
+	result = list(itertools.chain.from_iterable(blocks))
+	result_str = ''.join(str(chr(e)) for e in result)
+	print(result_str)
 
 	
 
